@@ -82,7 +82,7 @@ void temt_coleta(){
 
 void temt_envio(){
   // Envia os dados de radiação em MJ para o Firebase
-  Firebase.setFloat("Produtor/Cultura/Meteorologia/radiacao/valor_atual", radiacao_mj);
+  Firebase.setFloat("Produtor/Cultura/Meteorologia/radiacao/valor_atual", radiacao);
 };
 
 ////////////////// ---- BMP280 ----- ////////////////////
