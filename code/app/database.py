@@ -3,6 +3,7 @@ Descrição:
     Este código é responsável por estabelecer uma conexão com o banco de dados do Firebase e 
     monitorar os dados meteorológicos armazenados nele.
 """
+
 import pyrebase
 import datetime
 
@@ -90,22 +91,22 @@ Am = db.child('/Produtor/Cultura/Irrigacao/Am').get()
 Am = Am.val()
 
 TR = db.child('/Produtor/Cultura/Irrigacao/TR').get()
-TR = TR.val()
+TR = float(TR.val())
 
 Ai = db.child('/Produtor/Cultura/Irrigacao/Ai').get()
-Ai = Ai.val()
+Ai = float(Ai.val())
 
 esp_linhas = db.child('/Produtor/Cultura/esp_linhas').get()
-esp_linhas = esp_linhas.val()
+esp_linhas = float(esp_linhas.val())
 
 esp_plantas = db.child('/Produtor/Cultura/esp_plantas').get()
-esp_plantas = esp_plantas.val()
+esp_plantas = float(esp_plantas.val())
 
 vazao = db.child('/Produtor/Cultura/Irrigacao/vz_gotej').get()
 vazao = vazao.val()
 
 tempo_ant = db.child('/Produtor/Cultura/Irrigacao/tempo_ant').get()
-tempo_ant = tempo_ant.val()
+tempo_ant = float(tempo_ant.val())
 
 data_plantio = db.child('/Produtor/Cultura/data_plantio').get()
 data_plantio = data_plantio.val()
@@ -137,6 +138,13 @@ def registerCulture(dict_cultura, dict_irrigacao):
     for valor in dict_irrigacao:
         db.child(path3.format(valor)).set(dict_irrigacao[valor])
      
+
+
+
+    
+
+    
+
 
 
 
