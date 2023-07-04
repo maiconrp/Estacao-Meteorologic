@@ -2,172 +2,144 @@
 Descrição:  
     Este código é responsável por estabelecer uma conexão com o banco de dados do Firebase e 
     monitorar os dados meteorológicos armazenados nele.
-
-Importações:
-    - 'config.FIREBASE': Importa a configuração do Firebase.
-    - 'componentes.TextField': Importa cinco componentes de texto (pressão, radiação, temperatura, umidade e vento)
-
-Variáveis:
-    - 'db': Instância do banco de dados Firebase inicializado a partir da configuração importada.
-    - 'path': String que define o caminho padrão para acesso às informações meteorológicas no Firebase.
-    - 'componentes': Dicionário que associa cada tipo de dado meteorológico ao seu respectivo componente de texto.
-    - 'variaveis_firebase': Lista das variáveis meteorológicas monitoradas.
-    - 'streams': Dicionário para armazenar referências aos streams criados para monitorar as variáveis meteorológicas.
-
-Funções:
-    - 'stream': Função que atualiza os valores dos componentes de texto quando houver mudanças no Firebase. 
-                Recebe um dicionário 'message' e busca o componente correspondente ao tipo de dado meteorológico recebido. 
-                Em seguida, atualiza o valor do componente com o dado recebido.
-
-Classes:
-    - Nenhuma classe é declarada neste código.
-
-Loops:
-    - "for" : Inicializa todas as conexões com as variáveis monitoradas no Firebase. 
-              Para cada uma dessas variáveis, é criado um stream que monitora as atualizações nesse dado. 
-              O stream é adicionado ao dicionário 'streams' para ser mantido como uma referência.
-
 """
+import pyrebase
+import datetime
 
-"""
-from .config import FIREBASE
-from componentes.TextField import pressao, radiacao, temperatura, umidade, vento
+config = {
+  'apiKey': "AIzaSyDRgO8OH2ctVG-d6D-bH3qD1cOqeeCXl_k",
+  'authDomain': "estacao-meteorologic.firebaseapp.com",
+  'databaseURL': "https://estacao-meteorologic-default-rtdb.firebaseio.com",
+  'projectId': "estacao-meteorologic",
+  'storageBucket': "estacao-meteorologic.appspot.com",
+  'messagingSenderId': "483337827811",
+  'appId': "1:483337827811:web:80b8b243ae10e899775cd6"
+}
 
-# Inicialização do banco de dados do Firebase
+FIREBASE = pyrebase.initialize_app(config)
+
 db = FIREBASE.database()
 
-# Caminho padrão para acesso às informações meteorológicas
-path = "/Produtor/Cultura/Meteorologia/{}/valor_atual"
+def return_atual_day():
+    # Obter a data atual
+    data_atual = datetime.date.today()
 
-# Dicionário para associar cada tipo de dado meteorológico ao seu respectivo componente de texto
-componentes = {
-    "pressao": pressao,
-    "radiacao": radiacao,
-    "temperatura": temperatura,
-    "umidade": umidade,
-    "vento": vento,
-}
-variaveis_firebase = [
-    "pressao", 
-    "radiacao", 
-    "temperatura", 
-    "umidade", 
-    "vento"
-]
+    # Obter o número do dia da semana (segunda-feira = 0, domingo = 6)
+    numero_dia_semana = data_atual.weekday()
+    days = {
+        '0':'1',
+        '1':'2',
+        '2':'3',
+        '3':'4',
+        '4':'5',
+        '5':'6',
+        '6':'0',
+    }
 
-streams: dict = {}
+    # return days[str(numero_dia_semana)]
+    return '0'
 
-# Função para atualizar os valores dos componentes de texto quando houver mudanças no Firebase
-def stream(message):
-    # Busca o componente correspondente ao tipo de dado meteorológico recebido
-    componente = componentes.get(message["stream_id"])
-    # Atualiza o valor do componente
-    componente.value = message["data"]
+path1 = "/Produtor/Cultura/Meteorologia/{}/{}"
+path2 = "/Produtor/Cultura/{}"
+path3 = "/Produtor/Cultura/Irrigacao/{}"
+
+
+def calc_media(dicio, lista):
+    length = 0
+    soma = 0
+    for valor in dicio.each():
+       lista.append(valor.val()) 
+
+    for valor in lista:
+        soma = soma + valor
+
+    media = soma/len(lista)
+
+    return media
     
-# Inicialização dos streams de dados do Firebase para cada tipo de dado meteorológico
-for variavel in variaveis_firebase:
-    streams[variavel] = db.child(path.format(variavel)).stream(stream, stream_id=variavel)
 
-print(streams)
+values_rad = []
+values_temp = []
+values_umi = []
+values_vento = []
 
-# pressao_stream = db.child(path.format("pressao")).stream(stream, stream_id="pressao")
-# radiacao_stream = db.child(path.format("radiacao")).stream(stream, stream_id="radiacao")
-# temperatura_stream = db.child(path.format("temperatura")).stream(stream, stream_id="temperatura")
-# umidade_stream = db.child(path.format("umidade")).stream(stream, stream_id="umidade")
-# vento_stream = db.child(path.format("vento")).stream(stream, stream_id="vento")
+dict_temp = db.child(path1.format('temperatura_dht', return_atual_day())).get()
+print(path1.format('temperatura_dht', return_atual_day()))
+valores_etc = db.child('/Produtor/Cultura/Meteorologia/etc').get()
+dict_rad = db.child(path1.format('radiacao', return_atual_day())).get()
+dict_umi = db.child(path1.format('umidade', return_atual_day())).get()
+dict_vento = db.child(path1.format('vento', return_atual_day())).get()
+dict_pressao = db.child(path1.format('pressao_bmp', return_atual_day())).get()
 
-# class MeteorologiaStream:
-#     def __init__(self, variavel, objeto):
-#         self.variavel = db.child(variavel)
-#         self.variavel_stream = self.variavel.stream(self.stream_variavel)
-#         self.objeto = objeto
 
-#     def stream_variavel(self, message):
-#         objeto.value = message["data"]
-#         page.update()
-        
-#     def start(self):
-#         self.vento_stream.start()
+Rn = calc_media(dict_rad, values_rad) #Saldo de radiação em MJ/m2.dia
+Temp = calc_media(dict_temp, values_temp) # Temperatura em graus Celsius
+ur = calc_media(dict_umi, values_umi)   # Umidade Relativa em porcentagem
+vv = calc_media(dict_vento, values_vento)    # Velocidade do vento à 2m de altura em m/s
 
-# class FirebaseValor:
-#     def __init__(self, nome, caminho, campo):
-#         self.nome = nome
-#         self.caminho = caminho
-#         self.campo = campo
+cultura = db.child('/Produtor/Cultura/cultura').get()
+cultura = cultura.val()
 
-#     def start():
-#         caminhos_valores + nome + "valor_atual"
-#         pass
+data_plantio = db.child('/Produtor/Cultura/data_plantio').get()
+data_plantio = data_plantio.val()
 
-# pegar banco de dados
+estagio = db.child('/Produtor/Cultura/estagio').get()
+estagio = estagio.val()
 
-# def stream_database():
+Am = db.child('/Produtor/Cultura/Irrigacao/Am').get()
+Am = Am.val()
 
-#     db = DATABASE
-#  # Altera o valor sempre que ele atualiza no banco
-#     def stream_pressão(message):
-#         pressao.value = message["data"] # altera o valor do elemento (pressao.value) e atualiza
-#         page.update()
+TR = db.child('/Produtor/Cultura/Irrigacao/TR').get()
+TR = TR.val()
 
-#     def stream_radiacao(message):
-#         radiacao.value = message["data"]
-#         page.update()
+Ai = db.child('/Produtor/Cultura/Irrigacao/Ai').get()
+Ai = Ai.val()
+
+esp_linhas = db.child('/Produtor/Cultura/esp_linhas').get()
+esp_linhas = esp_linhas.val()
+
+esp_plantas = db.child('/Produtor/Cultura/esp_plantas').get()
+esp_plantas = esp_plantas.val()
+
+vazao = db.child('/Produtor/Cultura/Irrigacao/vz_gotej').get()
+vazao = vazao.val()
+
+tempo_ant = db.child('/Produtor/Cultura/Irrigacao/tempo_ant').get()
+tempo_ant = tempo_ant.val()
+
+data_plantio = db.child('/Produtor/Cultura/data_plantio').get()
+data_plantio = data_plantio.val()
+
+
+#print(cultura)
+#print(Rn)
+#print(Temp)
+#print(ur)
+#print(vv)
+
+
+def get_value(dicio):
+    dic = dicio.val()
+    ultimo_valor = list(dic.values())[-1]
+
+    return str(ultimo_valor)
+    print(ultimo_valor)
+
+
+def setIdade(value):
+    idd='idade'
+    db.child(path2.format(idd)).set(value)
+
+
+def registerCulture(dict_cultura, dict_irrigacao):
+    for info in dict_cultura.keys():
+        db.child(path2.format(info)).set(dict_cultura[info])
+    for valor in dict_irrigacao:
+        db.child(path3.format(valor)).set(dict_irrigacao[valor])
+     
+
+
+
     
-#     def stream_temp(message):
-#         temperatura.value = message["data"]
-#         page.update()
-
-#     def stream_umidade(message):
-#         umidade.value = message["data"]
-#         page.update()
-
-#     def stream_vento(message):
-#         vento.value = message["data"]
-#         page.update()
 
     
-#     # Pega cada valor de info clima e manda pra função monitorar ^
-#     pressao_stream = db.child("InfoClima").child(
-#         "Pressão").child("ultimo valor").stream(stream_pressão)
-#     radiacao_stream = db.child("InfoClima").child(
-#         "Radiacao").child("ultimo valor").stream(stream_radiacao)
-#     temperatura_stream = db.child("InfoClima").child(
-#         "Temperatura").child("ultimo valor").stream(stream_temp)
-#     umidade_stream = db.child("InfoClima").child(
-#         "Umidade").child("ultimo valor").stream(stream_umidade)
-#     vento_stream = db.child("InfoClima").child(
-#         "Vento").child("ultimo valor").stream(stream_vento)
-
-# class Database:
-#     def init(self, value, access_method):
-#         self.value = value
-#         self.access_method = access_method
-#         self.db = FIREBASE.database()
-
-#     def stream_database(self):
-#         if self.access_method == "stream":
-#             def stream_value(message):
-#                 self.value.value = message["data"]
-#                 page.update()
-
-#             value_stream = self.db.child("InfoClima").child(
-#                 self.value).child("ultimo valor").stream(stream_value)
-#         elif self.access_method == "get":
-#             value = self.db.child("InfoClima").child(
-#                 self.value).child("ultimo valor").get()
-#             self.value.value = value
-#             page.update()
-#         else:
-#             print("Método de acesso inválido.")
-
-#     pressao = Database("Pressão", "stream")
-#     pressao.stream_database()
-#     radiacao = Database("Radiacao", "stream")
-#     radiacao.stream_database()
-#     temperatura = Database("Temperatura", "stream")
-#     temperatura.stream_database()
-#     umidade = Database("Umidade", "stream")
-#     umidade.stream_database()
-#     vento = Database("Vento", "stream")
-#     vento.stream_database()
-"""
