@@ -1,0 +1,3 @@
+Data,Hora (UTC),Temp. Ins. (C),Temp. Max. (C),Temp. Min. (C),Umi. Ins. (%),Umi. Max. (%),Umi. Min. (%),Pto Orvalho Ins. (C),Pto Orvalho Max. (C),Pto Orvalho Min. (C),Pressao Ins. (hPa),Pressao Max. (hPa),Pressao Min. (hPa),Vel. Vento (m/s),Dir. Vento (m/s),Raj. Vento (m/s),Radiacao (KJ/m²)
+01/07/2023,0,"22,1",24,"22,1",38,38,32,7,7,6,"956,3","956,3","955,7","0,5",117,"4,8",0
+01/07/2023,100,"22,6","23,5","22,1",44,44,37,"9,8","9,8",7,"956,6","956,6","956,3","3,9",100,"7,2",0
