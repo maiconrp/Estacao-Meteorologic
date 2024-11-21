@@ -2,7 +2,7 @@ anyio==3.6.2
 certifi==2022.12.7
 cffi==1.15.1
 charset-normalizer==3.1.0
-cryptography==39.0.2
+cryptography==41.0.4
 Deprecated==1.2.13
 flet==0.7.4
 flet-core==0.7.4
