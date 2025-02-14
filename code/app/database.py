@@ -22,7 +22,7 @@ import pyrebase
 
 
 config = {
-  'apiKey': "AIzaSyDRgO8OH2ctVG-d6D-bH3qD1cOqeeCXl_k",
+  'apiKey': "-----------",
   'authDomain': "estacao-meteorologic.firebaseapp.com",
   'databaseURL': "https://estacao-meteorologic-default-rtdb.firebaseio.com",
   'projectId': "estacao-meteorologic",
